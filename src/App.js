@@ -24,6 +24,11 @@ const ChangeLog = styled.div`
   & > :not(:last-child) {
     margin-bottom: 16px;
   }
+
+  @media (max-width: 700px) {
+    width: calc(100%-32px);
+    padding: 0 16px;
+  }
 `;
 
 const SingleItem = styled(Timeline.Item)`
@@ -35,18 +40,15 @@ const App = () => {
   const [category, setCategory] = useState(null);
   const [query, setQuery] = useState('');
 
-  const matchesCategory = (subItem) => subItem.category === CATEGORIES[category];
-  const itemMatchesCategory = (item) => category === null
-    || item.items.some(subItem => matchesCategory(subItem));
-
-  const matchesQuery = (subItem) => subItem.content.match(new RegExp(`${query}`, 'ig')) !== null;
-  const itemMatchesQuery = (item) => query === ''
-    || item.items.some(subItem => matchesQuery(subItem));
+  const matchesCategory = (subItem) => category === null || subItem.category === CATEGORIES[category];
+  const matchesQuery = (subItem) => query === '' || subItem.content.match(new RegExp(`${query}`, 'ig')) !== null;
+  
+  const itemMatches = (item) => item.items.some(subItem => matchesQuery(subItem) && matchesCategory(subItem));
 
   const changelogItems = CHANGELOG
-    .filter(item => itemMatchesCategory(item) && itemMatchesQuery(item))
+    .filter(item => itemMatches(item))
     .map((item, index) => (
-      <SingleItem key={index}>
+      <SingleItem key={`date=${item.date}#index=${index}`}>
         <span>{item.date}</span>
         <List dataSource={
           item.items
